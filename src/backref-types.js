@@ -18,12 +18,15 @@ function prepareBackrefsFields(ct, ctIdToType) {
     const Type = ctIdToType[backref.ctId];
     if (Type) {
       acc[backref.backrefFieldName] = createBackrefFieldConfig(backref, Type);
-    } else if (backref.ctId === 'webPage') {
+    } 
+    if (backref.ctId === 'basePage') {
       acc[backref.backrefFieldName] = {
         type: new GraphQLList(WebPageType),
         resolve: (entryId, _, ctx) => {
           return ctx.entryLoader.queryBasePages(backref.ctId)
-          .then(entries => filterEntries(entries, backref.fieldId, entryId));
+          .then(entries => {
+            return filterEntries(entries, backref.fieldId, entryId)
+          });
         }
       };
     }
