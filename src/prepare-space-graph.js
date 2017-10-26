@@ -2,6 +2,7 @@
 
 const _get = require('lodash.get');
 const upperFirst = require('lodash.upperfirst');
+const flatten = require('lodash.flatten');
 const camelCase = require('lodash.camelcase');
 const pluralize = require('pluralize');
 
@@ -30,19 +31,27 @@ const SIMPLE_FIELD_TYPE_MAPPING = {
 };
 
 module.exports = prepareSpaceGraph;
-
 function prepareSpaceGraph(cts, basePageTypes = [], allowMultipleContentTypeFieldsForBackref = false) {
-  return addBackrefs(createSpaceGraph(cts, allowMultipleContentTypeFieldsForBackref), basePageTypes);
+  return addBackrefs(createSpaceGraph(cts, allowMultipleContentTypeFieldsForBackref, basePageTypes), basePageTypes);
 }
 
-function createSpaceGraph(cts, allowMultipleContentTypeFieldsForBackref) {
+function createSpaceGraph(cts, allowMultipleContentTypeFieldsForBackref, basePageTypes) {
   const accumulatedNames = {};
+
+  if (basePageTypes.length > 0) {
+    const basePage = cts.find(x => basePageTypes.includes(x.sys.id))
+    cts.push({
+      sys: { id: 'basePage' },
+      name: 'BasePage',
+      fields: basePage.fields.filter(f => f.id === 'urlFolder' || f.id === 'url')
+    });
+  }
 
   return cts.map(ct => ({
     id: ct.sys.id,
     names: names(ct.name, accumulatedNames),
     fields: ct.fields.reduce((acc, f) => {
-      return f.omitted ? acc : acc.concat([field(f, allowMultipleContentTypeFieldsForBackref)]);
+      return f.omitted ? acc : acc.concat([field(f, allowMultipleContentTypeFieldsForBackref, basePageTypes)]);
     }, [])
   }));
 }
@@ -72,7 +81,7 @@ function checkForConflicts(names, accumulatedNames) {
   return names;
 }
 
-function field(f, allowMultipleContentTypeFieldsForBackref) {
+function field(f, allowMultipleContentTypeFieldsForBackref, basePageTypes) {
   ['sys', '_backrefs'].forEach(id => {
     if (f.id === id) {
       throw new Error(`Fields named "${id}" are unsupported`);
@@ -82,7 +91,7 @@ function field(f, allowMultipleContentTypeFieldsForBackref) {
   return {
     id: f.id,
     type: type(f),
-    linkedCt: linkedCt(f, allowMultipleContentTypeFieldsForBackref)
+    linkedCt: linkedCt(f, allowMultipleContentTypeFieldsForBackref, basePageTypes)
   };
 }
 
@@ -117,7 +126,7 @@ function isEntityType(x) {
   return ENTITY_TYPES.indexOf(x) > -1;
 }
 
-function linkedCt(f, allowMultipleContentTypeFieldsForBackref) {
+function linkedCt(f, allowMultipleContentTypeFieldsForBackref, basePageTypes) {
   const prop = 'linkContentType';
   const validation = getValidations(f).find(v => {
     return Array.isArray(v[prop]) && (allowMultipleContentTypeFieldsForBackref ? v[prop].length : v[prop].length === 1);
@@ -126,6 +135,9 @@ function linkedCt(f, allowMultipleContentTypeFieldsForBackref) {
   const linkedCt = validation && validation[prop];
 
   if (linkedCt) {
+    if (linkedCt.find(x => basePageTypes.includes(x))) {
+      linkedCt.push('basePage')
+    }
     return linkedCt;
   }
 }
