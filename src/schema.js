@@ -81,11 +81,11 @@ function createQueryFields(spaceGraph, basePageTypes = []) {
   queryFields['basePage'].type.isTypeOf = entry => {
     const ctId = _get(entry, ['sys', 'contentType', 'sys', 'id']);
     return basePageTypes.includes(ctId);
-  }
+  };
 
   queryFields['basePage'].resolve = (_, args, ctx) => {
     return ctx.entryLoader.queryBasePages().then(entries => entries.find(entry => _get(entry, ['sys', 'id']) === args.id));
-  }
+  };
 
   return queryFields;
 }
