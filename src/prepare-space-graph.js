@@ -2,7 +2,6 @@
 
 const _get = require('lodash.get');
 const upperFirst = require('lodash.upperfirst');
-const flatten = require('lodash.flatten');
 const camelCase = require('lodash.camelcase');
 const pluralize = require('pluralize');
 
