@@ -54,7 +54,7 @@ function createSpaceGraph(cts, allowMultipleContentTypeFieldsForBackref, basePag
 
   return cts.map(ct => ({
     id: ct.sys.id,
-    names: names(ct.name, accumulatedNames),
+    names: names(ct.sys.id, accumulatedNames),
     fields: ct.fields.reduce((acc, f) => {
       return f.omitted ? acc : acc.concat([field(f, allowMultipleContentTypeFieldsForBackref, basePageTypes)]);
     }, []),
