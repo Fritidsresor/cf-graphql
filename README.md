@@ -1,5 +1,8 @@
 # cf-graphql
 
+A repo forked from Contentfuls GraphQL resolving repo, used in cms-contentful-graphql. The most major addition made from us is the addition of basePages which made writing queries in cms-contentful-graphql much easier.
+
+# Original Contentful documentation from their now archived repo
 [![travis build status](https://img.shields.io/travis/contentful-labs/cf-graphql.svg)](https://travis-ci.org/contentful-labs/cf-graphql)
 [![npm version](https://img.shields.io/npm/v/cf-graphql.svg)](https://www.npmjs.com/package/cf-graphql)
 [![npm downloads](https://img.shields.io/npm/dt/cf-graphql.svg)](https://www.npmjs.com/package/cf-graphql)
